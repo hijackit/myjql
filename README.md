@@ -118,10 +118,39 @@ SQL.create()
 ```
 translates into:
 ```sql
-INSERT INTO Users (email, password, creation_time) VALUES ('guesswhat@email.com', ?, now(), NULL, 'something')
+INSERT INTO Users (email, password, creation_time) 
+VALUES ('guesswhat@email.com', ?, now(), NULL, 'something')
 ```
 
 ## <a name="update"></a>Update
+
+```java
+SQL.create()
+    .update(Users)
+    .set(Users.email, "new@email.com")
+    .where(Users.email.equal("old@email.com"))
+    .toString();
+```
+translates into:
+```sql
+UPDATE Users SET Users.email = 'new@email.com' WHERE Users.email = 'old@email.com'
+```
+
+__Updates with conditionals__
+```java
+String newTitle = null;
+String newMessage = "New message";
+        
+String statement = SQL.create()
+    .update(Posts)
+    .set(Posts.title, newTitle).onlyIf(newTitle != null)
+    .set(Posts.message, newMessage).onlyIf(newMessage != null)
+    .toString();
+```
+translates into:
+```sql
+UPDATE Posts SET Posts.message = 'New message'
+```
 
 ## <a name="delete"></a>Delete
 
