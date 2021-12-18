@@ -106,6 +106,21 @@ SELECT Posts.pk FROM Posts WHERE Posts.title = ?
 
 ## <a name="insert"></a>Insert
 
+```java
+String nullValue = null;
+String notNullValue = "something";
+        
+SQL.create()
+    .insertInto(Users)
+    .columns(Users.email, Users.password, Users.creationTime, Users.address, Users.notes)
+    .values("guesswhat@email.com", "?", DateTimeField::now, Nulls.nullable(nullValue), Nulls.nullable(notNullValue))
+    .toString();
+```
+translates into:
+```sql
+INSERT INTO Users (email, password, creation_time) VALUES ('guesswhat@email.com', ?, now(), NULL, 'something')
+```
+
 ## <a name="update"></a>Update
 
 ## <a name="delete"></a>Delete
