@@ -11,6 +11,7 @@ The goal is to let you write the SQL that your already know, inside your program
 * [UPDATE](#update)
 * [DELETE](#delete)
 * [MERGE](#merge)
+* [Table declarations](#table)
 
 ## <a name="select"></a>Select
 __A simple select__
@@ -188,4 +189,68 @@ translates into:
 INSERT INTO Users(username, email, password)
 VALUES ('roby456', 'roby456@email.com', 'newsecret')
 ON DUPLICATE KEY UPDATE Users.password='newsecret'
+```
+
+## <a name="tables"></a>Tables declarations and usage
+To use this library you have to define your tables in Java too. 
+Nothing fancy here, just create a class that implements the Table interface.
+The toString() shall return the name of the table as defined in the schema.
+Every column has its own type too.
+```java
+public class Users implements Table {
+    public NumberField pk = new NumberField(this, "pk");
+    public TextField username = new TextField(this, "username");
+    public TextField password = new TextField(this, "password");
+    public DateTimeField creationTime = new DateTimeField(this, "creation_time");
+
+    public String toString() { return "Users"; }
+}
+```
+
+Supported column types are:
+* TextField
+* NumberField
+* DateField
+* TimeField
+* DateTimeField
+
+Once you have declared your tables, you can create a Tables class like the following
+```java
+package hijackit.myjql.schema;
+
+public class Tables {
+	public static Users Users = new Users();
+	public static Posts Posts = new Posts();
+}
+```
+
+and using static imports, you can write your queries like SQL:
+```java
+import static hijackit.myjql.schema.Tables.Users;
+
+String sql = SQL.create()
+        .selectDistinct(Users.email, Users.password)
+        .from(Users)
+        .where(Users.username.equalUpper("ROBY456"))
+        .toString();
+```
+
+Once you have your SQL statement, you can use it to run the queries with plain JDBC
+```java
+Connection con = null;
+PreparedStatement ps = null;
+try {
+    con = cp.getConnection();
+    String statement = SQL.create()
+        .insertInto(Users)
+        .columns(Users.email, Users.password, Users.creationTime)
+        .values("?", "?", DateTimeField::now)
+        .toString();
+    ps = con.prepareStatement(sql);
+    ps.setString(1, "robert21")
+    ps.setString(2, "secret")
+    ps.executeUpdate();
+} finally {
+    close(ps, con);
+}
 ```
