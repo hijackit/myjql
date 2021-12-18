@@ -174,3 +174,18 @@ WHERE Posts.user_fk IN (
 ```
 
 ## <a name="merge"></a>Merge
+
+```java
+String upsert = new Merge()
+        .mergeInto(Users)
+        .on(Users.username.equal("roby456"), Users.email.equal("roby456@email.com"))
+        .columns(Users.username, Users.email, Users.password)
+        .values("roby456", "roby456@email.com", "newsecret")
+        .toString();
+```
+translates into:
+```sql
+INSERT INTO Users(username, email, password)
+VALUES ('roby456', 'roby456@email.com', 'newsecret')
+ON DUPLICATE KEY UPDATE Users.password='newsecret'
+```
