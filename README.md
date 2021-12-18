@@ -154,4 +154,23 @@ UPDATE Posts SET Posts.message = 'New message'
 
 ## <a name="delete"></a>Delete
 
+```java
+Select select = SQL.create()
+    .select(Users.pk)
+    .from(Users)
+    .where(Users.email.equal("user@email.com"));
+
+String sql = SQL.create()
+    .deleteFrom(Posts)
+    .where(Posts.userFk.in(select))
+    .toString();
+```
+translates into:
+```sql
+DELETE FROM Posts 
+WHERE Posts.user_fk IN (
+    SELECT Users.pk FROM Users WHERE Users.email = 'user@email.com'
+)
+```
+
 ## <a name="merge"></a>Merge
